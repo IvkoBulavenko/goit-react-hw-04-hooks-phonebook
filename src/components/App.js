@@ -1,88 +1,75 @@
-import React, { Component } from "react";
-import Section from "./Section/Section.js";
-import Form from "./Form/Form.js";
-import Contacts from "./Contacts/Contacts.js";
-import Filter from "./Filter/Filter.js";
-import { nanoid } from "nanoid";
-import { info } from "@pnotify/core";
-import "@pnotify/core/dist/PNotify.css";
-import "@pnotify/core/dist/BrightTheme.css";
-import { Container, ContactsCss } from "../Styles/Container.styled";
+import { useState, useEffect } from 'react';
+import Section from './Section/Section.js';
+import Form from './Form/Form.js';
+import Contacts from './Contacts/Contacts.js';
+import Filter from './Filter/Filter.js';
+import { nanoid } from 'nanoid';
+import '@pnotify/core/dist/PNotify.css';
+import '@pnotify/core/dist/BrightTheme.css';
+import { Container, Contactscss } from '../Styles/Container.styled';
+import usedlocalStorage from '../localstorage/localStorage';
 
-class App extends Component {
-  state = {
-    contacts: [
-      { id: "id-1", name: "Rosie Simpson", number: "459-12-56" },
-      { id: "id-2", name: "Hermione Kline", number: "443-89-12" },
-      { id: "id-3", name: "Eden Clements", number: "645-17-79" },
-      { id: "id-4", name: "Annie Copeland", number: "227-91-26" },
-    ],
-    filter: "",
-  };
+function App() {
+  const [contacts, setContacts] = usedlocalStorage('contacts', [
+    { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+    { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+    { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+    { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+  ]);
+  const [filter, setFilter] = useState('');
+  const [filteredContacts, setFilteredContacts] = useState([...contacts]);
 
-  componentDidMount() {
-    const contacts = localStorage.getItem("contacts");
-    const parsedContacts = JSON.parse(contacts);
-    if (parsedContacts) {
-      this.setState({ contacts: parsedContacts });
+  useEffect(() => {
+    const parseContacts = JSON.parse(localStorage.getItem('contacts'));
+    if (parseContacts) {
+      setContacts(parseContacts);
     }
+  }, [setContacts]);
+
+  useEffect(() => {
+    setFilteredContacts(contacts);
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
+
+  useEffect(() => {
+    const changeFilter = filter.toLowerCase();
+    setFilteredContacts([
+      ...contacts.filter((contact) =>
+        contact.name.toLowerCase().includes(changeFilter)
+      ),
+    ]);
+  }, [contacts, filter]);
+
+  function addContact(data) {
+    const contact = {
+      id: nanoid(),
+      ...data,
+    };
+    contacts.some((contact) => contact.name === data.name)
+      ? alert(`${data.name} is already in contacts`)
+      : setContacts([contact, ...contacts]);
   }
 
-  componentDidUpdate(prevState) {
-    if (this.state.contacts !== prevState.contacts) {
-      localStorage.setItem("contacts", JSON.stringify(this.state.contacts));
-    }
+  function changefilter(event) {
+    setFilter(event.target.value);
   }
-  deleteContact = (id) => {
-    this.setState((prevState) => ({
-      contacts: prevState.contacts.filter((element) => element.id !== id),
-    }));
-  };
 
-  handleSearch = (e) => {
-    this.setState({ filter: e.target.value });
-  };
-  submit = (e, name, number, reset) => {
-    e.preventDefault();
-    const { contacts } = this.state;
-    if (!contacts.find((item) => item.name === name)) {
-      this.setState({
-        contacts: [
-          ...this.state.contacts,
-          { name: name, number: number, id: nanoid() },
-        ],
-      });
-      reset();
-    } else {
-      info({ text: `${name} is already in contacts.`, delay: 700 });
-    }
-  };
-
-  render() {
-    const search = this.state.filter.toLocaleLowerCase();
-    const visibleContacts = this.state.contacts.filter((element) =>
-      element.name.toLocaleLowerCase().includes(search)
-    );
-    return (
-      <Container>
-        <Section title="Phonebook">
-          <Form submit={this.submit} />
-        </Section>
-        <section>
-          <ContactsCss>Contacts</ContactsCss>
-          <Filter
-            name={this.state.name}
-            handler={(e) => this.handleSearch(e)}
-            search={(e) => this.search(e)}
-          />
-          <Contacts
-            contacts={visibleContacts}
-            deleteContact={this.deleteContact}
-          />
-        </section>
-      </Container>
-    );
+  function deleteContact(id) {
+    setContacts([...contacts.filter((contact) => contact.id !== id)]);
   }
+
+  return (
+    <Container>
+      <Section title="Phonebook">
+        <Form onSubmit={addContact} />
+      </Section>
+      <section>
+        <Contactscss>Contacts</Contactscss>
+        <Filter value={changefilter} changesfilter={filter} />
+        <Contacts contacts={filteredContacts} deleteContact={deleteContact} />
+      </section>
+    </Container>
+  );
 }
 
 export default App;

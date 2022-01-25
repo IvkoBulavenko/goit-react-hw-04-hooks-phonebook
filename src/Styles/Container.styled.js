@@ -1,4 +1,4 @@
-import styled from "@emotion/styled/macro";
+import styled from '@emotion/styled/macro';
 
 export const Container = styled.div`
   box-sizing: border-box;
@@ -19,13 +19,13 @@ export const Container = styled.div`
   }
 `;
 
-export const ContactsCss = styled.h2`
+export const Contactscss = styled.h2`
   text-align: center;
   color: #353b3a;
   margin-bottom: 10px;
   font-weight: 900;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   @media (min-width: 768px) {
     margin-bottom: 20px;
